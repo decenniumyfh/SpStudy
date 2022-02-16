@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <contextName>npsoa-api</contextName>
+    <!--springProperty只支持properties、xml文件,不支持yml-->
+    <!-- 日志根目录 -->
+    <springProperty scope="context" name="LOG_BASE" source="logging.file.path" defaultValue="logback"/>
+
+    <!-- 日志文件编码-->
+    <property name="LOG_CHARSET" value="UTF-8" />
+
+    <!-- 日志归档目录 -->
+    <property name="LOG_ARCHIVE" value="${LOG_BASE}/archive" />
+
+    <!--定义日志文件大小 超过这个大小会压缩归档 -->
+    <property name="ALL_MAX_FILE_SIZE" value="100MB"/>
+    <property name="INFO_MAX_FILE_SIZE" value="100MB"/>
+    <property name="ERROR_MAX_FILE_SIZE" value="100MB"/>
+    <property name="WARN_MAX_FILE_SIZE" value="100MB"/>
+
+    <!--定义日志文件最长保存时间 -->
+    <property name="ALL_MAX_HISTORY" value="12"/>
+    <property name="INFO_MAX_HISTORY" value="12"/>
+    <property name="ERROR_MAX_HISTORY" value="12"/>
+    <property name="WARN_MAX_HISTORY" value="12"/>
+
+    <!--定义归档日志文件最大保存大小，当所有归档日志大小超出定义时，会触发删除  -->
+    <property name="ALL_TOTAL_SIZE_CAP" value="5GB"/>
+    <property name="INFO_TOTAL_SIZE_CAP" value="5GB"/>
+    <property name="ERROR_TOTAL_SIZE_CAP" value="5GB"/>
+    <property name="WARN_TOTAL_SIZE_CAP" value="5GB"/>
+
+    <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度 %msg：日志消息，%n是换行符-->
+    <property name="FILE_LOG_PATTERN" value="%d %-5level [%thread] %logger{0}: %msg%n"/>
+
+    <!--每次启动产生一个日志-->
+    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+
+    <!--输出到控制台-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 定义 ALL 日志的输出方式:-->
+    <appender name="ALL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前log文件 -->
+        <file>${LOG_BASE}/all.log</file>
+        <!-- 文件归档策略 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/all/all.%d{yyyyMMdd}.%i.log</fileNamePattern>
+            <maxFileSize>${ALL_MAX_FILE_SIZE}</maxFileSize>
+            <maxHistory>${ALL_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${ALL_TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <!-- 格式化输出 -->
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- 过滤器 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+    <!-- 定义 INFO 日志的输出方式:-->
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前log文件 -->
+        <file>${LOG_BASE}/info.log</file>
+        <!-- 文件归档策略 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/info/info.%d{yyyyMMdd}.%i.log</fileNamePattern>
+            <maxFileSize>${INFO_MAX_FILE_SIZE}</maxFileSize>
+            <maxHistory>${INFO_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${INFO_TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <!-- 格式化输出 -->
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- 过滤器 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <!-- 定义 WARN 日志的输出方式:-->
+    <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前log文件 -->
+        <file>${LOG_BASE}/warn.log</file>
+        <!-- 文件归档策略 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/warn/warn.%d{yyyyMMdd}.%i.log</fileNamePattern>
+            <maxFileSize>${WARN_MAX_FILE_SIZE}</maxFileSize>
+            <maxHistory>${WARN_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${WARN_TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <!-- 格式化输出 -->
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- 过滤器 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 定义 ERROR 日志的输出方式:-->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前log文件 -->
+        <file>${LOG_BASE}/error.log</file>
+        <!-- 文件归档策略 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_ARCHIVE}/error/error.%d{yyyyMMdd}.%i.log</fileNamePattern>
+            <maxFileSize>${ERROR_MAX_FILE_SIZE}</maxFileSize>
+            <maxHistory>${ERROR_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${ERROR_TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <!-- 格式化输出 -->
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- 过滤器 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- Kafka的appender -->
+    <!--<appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">-->
+    <!--<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
+    <!--<pattern>${FILE_LOG_PATTERN}</pattern>-->
+    <!--</encoder>-->
+    <!--<topic>${kafka_env}applog_${spring_application_name}</topic>-->
+    <!--<keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />-->
+    <!--<deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />-->
+    <!--<producerConfig>bootstrap.servers=${kafka_broker}</producerConfig>-->
+    <!--&lt;!&ndash; don't wait for a broker to ack the reception of a batch.  &ndash;&gt;-->
+    <!--<producerConfig>acks=0</producerConfig>-->
+    <!--&lt;!&ndash; wait up to 1000ms and collect log messages before sending them as a batch &ndash;&gt;-->
+    <!--<producerConfig>linger.ms=1000</producerConfig>-->
+    <!--&lt;!&ndash; even if the producer buffer runs full, do not block the application but start to drop messages &ndash;&gt;-->
+    <!--<producerConfig>max.block.ms=0</producerConfig>-->
+    <!--&lt;!&ndash; Optional parameter to use a fixed partition &ndash;&gt;-->
+    <!--<partition>8</partition>-->
+    <!--</appender>-->
+    <!--<appender name="KAFKA_ASYNC" class="ch.qos.logback.classic.AsyncAppender">-->
+    <!--<appender-ref ref="KAFKA" />-->
+    <!--</appender>-->
+
+    <springProfile name="dev">
+        <logger name="com.asiainfo.npsoa" level="DEBUG" />
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ALL_FILE"/>
+            <appender-ref ref="INFO_FILE"/>
+            <appender-ref ref="WARN_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <logger name="com.asiainfo.npsoa" level="DEBUG" />
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ALL_FILE"/>
+            <appender-ref ref="INFO_FILE"/>
+            <appender-ref ref="WARN_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="com.asiainfo.npsoa" level="INFO" />
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="INFO_FILE"/>
+            <appender-ref ref="WARN_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+    </springProfile>
+</configuration>
