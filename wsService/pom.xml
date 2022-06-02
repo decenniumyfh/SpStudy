@@ -21,5 +21,4 @@
             <artifactId>cxf-rt-features-logging</artifactId>
         </dependency>
     </dependencies>
-
 </project>
