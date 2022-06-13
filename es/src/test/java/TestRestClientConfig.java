@@ -1,8 +1,8 @@
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.mapping.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.bulk.BulkResponseItem;
@@ -11,19 +11,15 @@ import co.elastic.clients.elasticsearch.core.search.TotalHits;
 import co.elastic.clients.elasticsearch.core.search.TotalHitsRelation;
 import co.elastic.clients.elasticsearch.indices.*;
 import com.yang.es.EsApplication;
-import com.yang.es.bean.Product;
 import com.yang.es.bean.Student;
-import com.yang.es.config.RestClientConfig;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.mapper.KeywordFieldMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -215,24 +211,42 @@ public class TestRestClientConfig {
                 .query("张")
         )._toQuery();
         //时间范围查询
-        Query date = RangeQuery.of(m->m
+        Query date_ = RangeQuery.of(m->m
                 .field("joinDate")
                 .format("yyyy-MM-dd HH:mm:ss")
-                .from("2021-08-02 15:30:45")
-                .to("2022-12-02 15:30:45")
+                .from("2000-08-02 15:30:45")
+                .to("2023-12-02 15:30:45")
 
         )._toQuery();
 
 
+
+
+        Aggregation schoolNameAgg = Aggregation.of(m->m
+                .terms(t->t.field("schoolName.keyword").size(100))
+                );
+        Aggregation sexAgg = Aggregation.of(m->m
+                .terms(t->t.field("sex").size(100))
+        );
+
+
+        //TODO 多条件分组怎么写？不会
+
         SearchRequest searchRequest = new SearchRequest.Builder()
                 .index(index)
                 .query(q -> q.bool(b->b
-                        .must(bySex)
+                        //.must(bySex)
                         //.must(bySchoolName)
                         //.must(byFirstName)
-                        .filter(date)
+                        .filter(date_)
                 ))
+                //.aggregations("schoolNameAgg",schoolNameAgg)
+                //.aggregations("sexAgg",sexAgg)
+
                 .build();
+
+
+
         log.info(searchRequest.toString());
         SearchResponse<Student> response = client.search(searchRequest,Student.class);
 
@@ -244,12 +258,12 @@ public class TestRestClientConfig {
         } else {
             log.info("There are more than " + total.value() + " results");
         }
-
-        List<Hit<Student>> hits = response.hits().hits();
+        log.info(response.toString());
+        /*List<Hit<Student>> hits = response.hits().hits();
         for (Hit<Student> hit: hits) {
             Student student = hit.source();
             log.info("Found Student " + student.getNum() + ","+student);
-        }
+        }*/
 
 
     }
