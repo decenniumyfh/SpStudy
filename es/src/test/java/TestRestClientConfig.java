@@ -1,5 +1,7 @@
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.MultiTermLookup;
+import co.elastic.clients.elasticsearch._types.aggregations.MultiTermsAggregation;
 import co.elastic.clients.elasticsearch._types.mapping.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
@@ -229,8 +231,14 @@ public class TestRestClientConfig {
                 .terms(t->t.field("sex").size(100))
         );
 
+        //es多条件分组聚合MultiTermsAggregation支持排序,如果不用排序可 using nested terms aggregation or composite aggregations
+        List<MultiTermLookup> list = new ArrayList<>();
+        MultiTermLookup multi_schoolName = MultiTermLookup.of(t->t.field("schoolName.keyword"));
+        MultiTermLookup multi_sex = MultiTermLookup.of(t->t.field("sex"));
+        list.add(multi_schoolName);
+        list.add(multi_sex);
+        MultiTermsAggregation multiTermsAggregation = MultiTermsAggregation.of(m->m.terms(list));
 
-        //TODO 多条件分组怎么写？不会
 
         SearchRequest searchRequest = new SearchRequest.Builder()
                 .index(index)
@@ -242,7 +250,7 @@ public class TestRestClientConfig {
                 ))
                 //.aggregations("schoolNameAgg",schoolNameAgg)
                 //.aggregations("sexAgg",sexAgg)
-
+                .aggregations("schoolAndSexAgg",multiTermsAggregation._toAggregation())
                 .build();
 
 
