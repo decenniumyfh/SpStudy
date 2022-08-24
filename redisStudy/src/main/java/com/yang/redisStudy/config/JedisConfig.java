@@ -7,7 +7,6 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.core.io.ClassPathResource;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -19,13 +18,14 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.Security;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-public class SocketFactory {
+public class JedisConfig {
     /**
      * 创建 SSLSocketFactory 工厂
      *
@@ -110,17 +110,20 @@ public class SocketFactory {
 
     public static void main(String[] args) {
         try {
-            SSLSocketFactory socketFactory = getSocketFactory("redis/ca.crt", "redis/redis.crt", "redis/redis.key", null);
+            /*SSLSocketFactory socketFactory = getSocketFactory("redis/ca.crt", "redis/redis.crt", "redis/redis.key", "123");
             JedisPool jedisPool = new JedisPool(new JedisPoolConfig(),
                     "120.46.142.51",
                     6379,
                     0,
                     "foobared",
                     true,
-                    socketFactory,null,null);
+                    socketFactory,null,null);*/
+            JedisPool jedisPool = new JedisPool(new JedisPoolConfig(),"127.0.0.1",6379);
             Jedis resource = jedisPool.getResource();
             resource.set("key_test","12345667789");
             System.out.println(resource.get("key_test"));
+            resource.hset("user".getBytes(StandardCharsets.UTF_8),"id".getBytes(StandardCharsets.UTF_8),"1".getBytes(StandardCharsets.UTF_8));
+            System.out.println(            resource.hget("user".getBytes(StandardCharsets.UTF_8),"id".getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             e.printStackTrace();
         }
