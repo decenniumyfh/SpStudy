@@ -1,9 +1,13 @@
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.AverageAggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.MultiTermLookup;
 import co.elastic.clients.elasticsearch._types.aggregations.MultiTermsAggregation;
 import co.elastic.clients.elasticsearch._types.mapping.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MultiMatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch.core.*;
@@ -199,10 +203,12 @@ public class TestRestClientConfig {
 
         String index = "student";
 
+        //boolean类型值查询
         Query bySex = MatchQuery.of(m -> m
                 .field("sex")
                 .query(true)
         )._toQuery();
+        //学校名精确查询 keyword
         Query bySchoolName = MatchQuery.of(m -> m
                 .field("schoolName.keyword")
                 .query("一中")
@@ -222,16 +228,20 @@ public class TestRestClientConfig {
         )._toQuery();
 
 
-
-
+        //text只能进行模糊查询，精确查询需要使用keyword
         Aggregation schoolNameAgg = Aggregation.of(m->m
                 .terms(t->t.field("schoolName.keyword").size(100))
                 );
+
+        //使用性别进行分组
         Aggregation sexAgg = Aggregation.of(m->m
                 .terms(t->t.field("sex").size(100))
         );
 
-        //es多条件分组聚合MultiTermsAggregation支持排序,如果不用排序可 using nested terms aggregation or composite aggregations
+        //对分数取平均数
+        Aggregation gradeAvg = Aggregation.of(m->m.avg(t->t.field("grade"))).avg()._toAggregation();
+
+        //es8多条件分组聚合MultiTermsAggregation支持排序,如果不用排序可 using nested terms aggregation or composite aggregations
         List<MultiTermLookup> list = new ArrayList<>();
         MultiTermLookup multi_schoolName = MultiTermLookup.of(t->t.field("schoolName.keyword"));
         MultiTermLookup multi_sex = MultiTermLookup.of(t->t.field("sex"));
@@ -239,7 +249,15 @@ public class TestRestClientConfig {
         list.add(multi_sex);
         MultiTermsAggregation multiTermsAggregation = MultiTermsAggregation.of(m->m.terms(list));
 
+        //排序
+        //SortOptions schoolSort = SortOptions.of(t->t.field(f->f.field("schoolName.keyword")));
+        SortOptions gradeSort = SortOptions.of(t->t.field(f->f.field("grade").order(SortOrder.Desc)));
 
+        //多条件查询
+        List<String> fieldList = new ArrayList<>();
+        fieldList.add("schoolName");
+        fieldList.add("userName.first");
+        Query multiQ = MultiMatchQuery.of(m->m.query("中").fields(fieldList))._toQuery();
         SearchRequest searchRequest = new SearchRequest.Builder()
                 .index(index)
                 .query(q -> q.bool(b->b
@@ -247,15 +265,19 @@ public class TestRestClientConfig {
                         //.must(bySchoolName)
                         //.must(byFirstName)
                         .filter(date_)
+                        .must(multiQ)
                 ))
                 //.aggregations("schoolNameAgg",schoolNameAgg)
                 //.aggregations("sexAgg",sexAgg)
                 .aggregations("schoolAndSexAgg",multiTermsAggregation._toAggregation())
+                //.sort(gradeSort)
+                //.aggregations("gradeAvgAgg",gradeAvg)
                 .build();
 
 
 
         log.info(searchRequest.toString());
+        //使用对象封装匹配的返回数据集合
         SearchResponse<Student> response = client.search(searchRequest,Student.class);
 
         TotalHits total = response.hits().total();
@@ -267,11 +289,11 @@ public class TestRestClientConfig {
             log.info("There are more than " + total.value() + " results");
         }
         log.info(response.toString());
-        /*List<Hit<Student>> hits = response.hits().hits();
+        List<Hit<Student>> hits = response.hits().hits();
         for (Hit<Student> hit: hits) {
             Student student = hit.source();
             log.info("Found Student " + student.getNum() + ","+student);
-        }*/
+        }
 
 
     }
