@@ -54,5 +54,36 @@ public class SimulatorServiceImpl implements SimulatorService {
         return true;
     }
 
+    @Override
+    public Map<String, Object> restfulTest(String id) {
+        User user1 = new User();
+        user1.setAccount("Mr_Three");
+        user1.setName("张三");
+        user1.setPassword("123456");
 
+        User user2 = new User();
+        user2.setAccount("Mr_Four");
+        user2.setName("李四");
+        user2.setPassword("qweuytrbvc");
+
+        User user3 = new User();
+        user3.setAccount("Mr_Five");
+        user3.setName("王五");
+        user3.setPassword("55555555555");
+
+        Map<String,Object> resultMaps = new HashMap<String,Object>();
+        User user = new User();
+        if("1".equals(id)){
+            user = user1;
+        }else if("2".equals(id)){
+            user = user2;
+        }else if("3".equals(id)){
+            user = user3;
+        }else{
+            user = null;
+        }
+
+        resultMaps.put("user",user);
+        return resultMaps;
+    }
 }

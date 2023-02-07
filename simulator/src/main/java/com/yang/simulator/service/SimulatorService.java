@@ -14,4 +14,6 @@ public interface SimulatorService {
     Map<String,Object> login2(User user);
 
     Object test();
+
+    Map<String,Object> restfulTest(String id);
 }

@@ -6,3 +6,7 @@ spring:
 server:
   port: 7901
 
+webSocket:
+  netty:
+    path: /
+    port: 58080

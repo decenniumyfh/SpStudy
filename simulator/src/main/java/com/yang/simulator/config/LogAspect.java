@@ -1,7 +1,7 @@
 package com.yang.simulator.config;
 
+import cn.hutool.json.JSONUtil;
 import com.yang.simulator.config.filter.BodyReaderHttpServletRequestWrapper;
-import com.yang.simulator.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -64,13 +64,13 @@ public class LogAspect {
         String contentType = request.getContentType();
         StringBuilder logStr = new StringBuilder("\n--------------------------请求报文----------------------------\n");
         logStr.append("请求类型 : " + request.getMethod() + "，\t请求URL : " + request.getRequestURL().toString() + "\n");
-        logStr.append("Header: " + JsonUtil.objectToJson(getHeaderMap(request)) + "\n");
-        logStr.append("Parameter: " + JsonUtil.objectToJson(getParameterMap(request)) + "\n");
+        logStr.append("Header: " + JSONUtil.toJsonStr(getHeaderMap(request)) + "\n");
+        logStr.append("Parameter: " + JSONUtil.toJsonStr(getParameterMap(request)) + "\n");
         logStr.append("调用方法 : " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName()
                 + "\t(" + joinPoint.getTarget().getClass().getSimpleName() + ".java:1)" + "\n"
                 + "请求参数 : " + Arrays.toString(joinPoint.getArgs()) + "\n");
         if (null != contentType && contentType.contains("application/json")) {
-            logStr.append("请求参数json格式：" + JsonUtil.objectToJson(joinPoint.getArgs()) + "\n");
+            logStr.append("请求参数json格式：" + JSONUtil.toJsonStr(joinPoint.getArgs()) + "\n");
         }
 
         logStr.append("--------------------------------------------------------------");

@@ -43,6 +43,20 @@ public class SimulatorController {
         return ResponseEntity.ok(ResultUtil.getSuccess(simulatorService.test()));
     }
 
+    @RequestMapping("test/{id}")
+    @ResponseBody
+    public ResponseEntity restfulTest(@PathVariable("id")  String id){
+
+        return ResponseEntity.ok(ResultUtil.getSuccess(simulatorService.restfulTest(id)));
+    }
+
+
+
+
+
+
+
+
 
 
 
